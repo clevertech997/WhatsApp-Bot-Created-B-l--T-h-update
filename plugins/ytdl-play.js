@@ -1,6 +1,10 @@
 const config = require('../config');
 const { cmd } = require('../command');
 const yts = require('yt-search');
+const fetch = require('node-fetch'); // hakikisha fetch ipo
+
+// API Key ya YouTube
+const YT_API_KEY = 'AIzaSyAHYyQyarO-dW78hvPF_rdvOcprjR9Gfbc';
 
 cmd({
     pattern: "yt2",
@@ -16,14 +20,18 @@ cmd({
 
         let videoUrl, title;
         
-        // Check if it's a URL
         if (q.match(/(youtube\.com|youtu\.be)/)) {
+            // URL ya YouTube
             videoUrl = q;
-            const videoInfo = await yts({ videoId: q.split(/[=/]/).pop() });
-            title = videoInfo.title;
+            const videoId = q.split(/[=/]/).pop();
+            const apiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${YT_API_KEY}&part=snippet,contentDetails`;
+            const res = await fetch(apiUrl);
+            const json = await res.json();
+            if (!json.items || !json.items.length) return await reply("❌ Video not found!");
+            title = json.items[0].snippet.title;
         } else {
-            // Search YouTube
-            const search = await yts(q);
+            // Tafuta kwa query
+            const search = await yts({ query: q, hl: 'en', gl: 'US' });
             if (!search.videos.length) return await reply("❌ No results found!");
             videoUrl = search.videos[0].url;
             title = search.videos[0].title;
@@ -31,9 +39,8 @@ cmd({
 
         await reply("⏳ Downloading audio...");
 
-        // Use API to get audio
-        const apiUrl = `https://api.davidcyriltech.my.id/download/ytmp3?url=${encodeURIComponent(videoUrl)}`;
-        const response = await fetch(apiUrl);
+        const downloadApi = `https://api.davidcyriltech.my.id/download/ytmp3?url=${encodeURIComponent(videoUrl)}`;
+        const response = await fetch(downloadApi);
         const data = await response.json();
 
         if (!data.success) return await reply("❌ Failed to download audio!");
@@ -51,4 +58,3 @@ cmd({
         await reply(`❌ Error: ${error.message}`);
     }
 });
-
