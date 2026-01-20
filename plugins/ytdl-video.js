@@ -1,6 +1,14 @@
 const config = require('../config');
 const { cmd } = require('../command');
-const yts = require('yt-search');
+const ytdl = require('ytdl-core');
+const { google } = require('googleapis');
+const fetch = require('node-fetch'); // kama bado unataka fetch kwa thumbnails
+const path = require('path');
+const fs = require('fs-extra');
+
+// YouTube API key
+const YT_API_KEY = "AIzaSyAHYyQyarO-dW78hvPF_rdvOcprjR9Gfbc";
+const youtube = google.youtube({ version: 'v3', auth: YT_API_KEY });
 
 cmd({
     pattern: "video2",
@@ -15,36 +23,48 @@ cmd({
         if (!q) return await reply("❌ Please provide a video name or YouTube URL!");
 
         let videoUrl, title;
-        
-        // Check if it's a URL
-        if (q.match(/(youtube\.com|youtu\.be)/)) {
+
+        // Kama ni URL
+        if (ytdl.validateURL(q)) {
             videoUrl = q;
-            const videoInfo = await yts({ videoId: q.split(/[=/]/).pop() });
-            title = videoInfo.title;
+            const info = await ytdl.getInfo(videoUrl);
+            title = info.videoDetails.title;
         } else {
-            // Search YouTube
-            const search = await yts(q);
-            if (!search.videos.length) return await reply("❌ No results found!");
-            videoUrl = search.videos[0].url;
-            title = search.videos[0].title;
+            // Tafuta video kwa query using YouTube API
+            const searchRes = await youtube.search.list({
+                part: "snippet",
+                q: q,
+                type: "video",
+                maxResults: 1
+            });
+            if (!searchRes.data.items.length) return await reply("❌ No results found!");
+            const videoId = searchRes.data.items[0].id.videoId;
+            videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+            title = searchRes.data.items[0].snippet.title;
         }
 
         await reply("⏳ Downloading video...");
 
-        // Use API to get video
-        const apiUrl = `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(videoUrl)}`;
-        const response = await fetch(apiUrl);
-        const data = await response.json();
+        // Pakua video na ytdl-core
+        const filePath = path.join(__dirname, `${title}.mp4`);
+        const stream = ytdl(videoUrl, { quality: "highestvideo" });
+        const writeStream = fs.createWriteStream(filePath);
+        stream.pipe(writeStream);
 
-        if (!data.success) return await reply("❌ Failed to download video!");
+        writeStream.on("finish", async () => {
+            await conn.sendMessage(from, {
+                video: { url: filePath },
+                mimetype: "video/mp4",
+                caption: `📹 ${title}`
+            }, { quoted: mek });
 
-        await conn.sendMessage(from, {
-            video: { url: data.result.download_url },
-            mimetype: 'video/mp4',
-            caption: `*${title}*`
-        }, { quoted: mek });
+            fs.unlinkSync(filePath); // Futa file baada ya kutumwa
+        });
 
-        await reply(`✅ *${title}* downloaded successfully!`);
+        stream.on("error", (err) => {
+            console.error(err);
+            reply("❌ Failed to download video.");
+        });
 
     } catch (error) {
         console.error(error);
