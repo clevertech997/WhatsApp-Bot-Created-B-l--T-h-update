@@ -113,14 +113,14 @@ const port = process.env.PORT || 9090;
   console.log('Bot connected to whatsapp ✅')
   
   let up = `*╭─────────────━┈⊷*
-*│ ᴄʀɪss-ᴀɪ ᴄᴏɴɴᴇᴄᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟ*
+*│ clever-tech ᴄᴏɴɴᴇᴄᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟ*
 *╰─────────────━┈⊷*
 
 *╭─────────────━┈⊷*
-*│ᴄʀɪss ᴀɪ ɪs ᴏɴʟɪɴᴇ*
+*│clever tech is an online*
 *│ᴘʀᴇғɪx : [${config.PREFIX}*]
 *│ᴍᴏᴅᴇ :[ ${config.MODE}*]
-*│ᴏᴡɴᴇʀ: ᴄʀɪss ᴠᴇᴠᴏ*
+*│ᴏᴡɴᴇʀ: clever tech*
 *╰─────────────━┈⊷*
 
 *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴄʀɪss ᴠᴇᴠᴏ*`;
