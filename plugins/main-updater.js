@@ -19,7 +19,7 @@ cmd({
         await reply("🔍 Checking for CRISS-AI updates...");
 
         // Fetch the latest commit hash from GitHub
-        const { data: commitData } = await axios.get("https://api.github.com/repos/criss-vevo/CRISS-AI/commits/main");
+        const { data: commitData } = await axios.get("https://api.github.com/repos/clevertech997/WhatsApp-Bot-Created-B-l--T-h-update/commits/main");
         const latestCommitHash = commitData.sha;
 
         // Get the stored commit hash from the database
