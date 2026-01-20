@@ -11,7 +11,7 @@ cmd({
     filename: __filename,
 },
 async (conn, mek, m, { from, reply }) => {
-    const githubRepoURL = 'https://github.com/criss-vevo/CRISS-AI';
+    const githubRepoURL = 'https://github.com/clevertech997/WhatsApp-Bot-Created-B-l--T-h-update';
 
     try {
         // Extract username and repo name from the URL
